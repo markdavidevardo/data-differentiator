@@ -1,0 +1,72 @@
+{
+  "name": "contribution-differentiator-pro",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port=3000",
+    "build": "vite build",
+    "lint": "tsc --noEmit",
+    "electron": "electron .",
+    "dist": "vite build && electron-builder --win nsis portable",
+    "test": "node --test --experimental-strip-types src/utils/matcher.test.ts src/utils/historyDates.test.ts src/utils/undoHistory.test.ts src/utils/backup.test.ts src/utils/windowOpening.test.ts"
+  },
+  "dependencies": {
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "@fontsource/google-sans": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "electron": "^45.1.0",
+    "electron-builder": "^26.18.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.3.0"
+  },
+  "main": "electron/main.cjs",
+  "description": "Data Differentiator — compare names, values and changes",
+  "author": "Mark David Evardo",
+  "build": {
+    "appId": "com.markdavidevardo.contributiondifferentiator",
+    "productName": "Data Differentiator",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "build/icon-512.png",
+      "package.json",
+      "!**/*.map"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "legalTrademarks": "Data Differentiator"
+    },
+    "copyright": "Copyright © Mark David Evardo",
+    "portable": {
+      "artifactName": "DataDifferentiator-Portable.exe"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "artifactName": "DataDifferentiator-Setup.exe",
+      "deleteAppDataOnUninstall": false
+    },
+    "compression": "maximum",
+    "asar": true
+  }
+}
