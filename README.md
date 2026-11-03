@@ -31,6 +31,3 @@ npm run dist
 ```
 
 The `release` folder will contain `DataDifferentiator-Setup.exe` and `DataDifferentiator-Portable.exe`.
-
-## Author
-Mark David Evardo
