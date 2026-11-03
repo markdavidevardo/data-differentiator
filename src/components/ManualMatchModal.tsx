@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link2, Search, X } from 'lucide-react';
 import { Button } from './ui/Button';
-import { DatasetBadge } from './DatasetBadge';
 import { DataEntry, MatchedPair, compareNames, formatValue, normalizeName } from '../utils/matcher';
 
 interface ManualMatchModalProps {
@@ -45,7 +44,6 @@ export const ManualMatchModal: React.FC<ManualMatchModalProps> = ({ pair, candid
         <div className="p-5 space-y-4 text-xs overflow-hidden flex flex-col">
           <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-medium">
-              <DatasetBadge dataset={fromA ? 'A' : 'B'} size="sm" />
               Entry from Dataset {fromA ? 'A' : 'B'}
             </div>
             <div className="mt-1.5 flex items-center justify-between gap-3">
@@ -55,7 +53,6 @@ export const ManualMatchModal: React.FC<ManualMatchModalProps> = ({ pair, candid
           </div>
 
           <div className="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-300">
-            <DatasetBadge dataset={target} size="sm" />
             Choose the Dataset {target} entry to match it with
           </div>
 

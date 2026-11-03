@@ -3,15 +3,11 @@
 /* Class-based dark mode: the app adds/removes the "dark" class on <html> */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/*
- * Design system — "Fresh Workspace"
- * One typeface (Google Sans) everywhere, a cool modern neutral palette,
- * Google-style blue accent, softer corners and lighter shadows.
- * Overriding Tailwind's palette here restyles every screen consistently.
- */
+/* One typeface (Segoe UI Variable, built into Windows 11) for the whole app, plus the colour palette. */
 @theme {
-  --font-sans: 'Google Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'Google Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Segoe UI Variable Text', 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Segoe UI Variable Text', 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+
 
   /* Neutral: cool, airy greys with a hint of blue */
   --color-slate-50: oklch(0.985 0.003 250);
@@ -117,7 +113,7 @@
 .title-drag { -webkit-app-region: drag; }
 .title-no-drag, .title-no-drag * { -webkit-app-region: no-drag; }
 
-/* Reference workspace: semantic roles used throughout the redesigned shell. */
+/* Semantic colour roles used across the app */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -134,7 +130,7 @@
   --foreground: oklch(0.235 0.007 265);
   --surface: oklch(1 0 0);
   --muted: oklch(0.976 0.007 265);
-  --muted-foreground: oklch(0.55 0.008 265);
+  --muted-foreground: oklch(0.46 0.01 265);
   --primary: oklch(0.49 0.205 260);
   --primary-foreground: oklch(1 0 0);
   --accent: oklch(0.917 0.041 263);
@@ -150,7 +146,7 @@
   --foreground: oklch(0.94 0.003 265);
   --surface: oklch(0.205 0.007 265);
   --muted: oklch(0.239 0.008 265);
-  --muted-foreground: oklch(0.7 0.008 265);
+  --muted-foreground: oklch(0.78 0.008 265);
   --primary: oklch(0.77 0.102 258);
   --primary-foreground: oklch(0.23 0.06 260);
   --accent: oklch(0.31 0.054 263);
@@ -164,7 +160,8 @@ body { background: var(--background); color: var(--foreground); }
 .ui-button:disabled { cursor: default; opacity: 0.38; }
 .ui-button svg { stroke-width: 1.8; color: inherit; flex-shrink: 0; }
 .app-shell { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; background: var(--background); color: var(--foreground); }
-.window-bar { height: 58px; flex-shrink: 0; display: flex; align-items: center; gap: 22px; padding: 0 15px; }
+.window-bar { height: 58px; flex-shrink: 0; display: flex; align-items: stretch; gap: 22px; padding: 0 0 0 15px; }
+.window-bar > .window-brand, .window-bar > .comparison-tools { align-self: center; }
 .window-brand { flex-shrink: 0; display: flex; gap: 12px; align-items: center; white-space: nowrap; font-size: 16px; font-weight: 600; }
 .window-brand img { width: 32px; height: 32px; }
 .comparison-tools { margin-left: auto; display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; flex: 1; }
@@ -174,11 +171,14 @@ body { background: var(--background); color: var(--foreground); }
 .comparison-name:focus-within { border-color: var(--primary); outline: 2px solid var(--accent); }
 .comparison-name input { background: transparent; border: 0; width: 100%; min-width: 0; color: var(--foreground); font-size: 14px; outline: none; }
 .save-comparison { display: flex; align-items: center; justify-content: center; gap: 6px; height: 34px; width: 140px; flex-shrink: 0; padding: 0 10px; border-radius: 6px; color: var(--primary); background: var(--accent); font-size: 13px; white-space: nowrap; }
-.window-tools { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
+.window-tools { display: flex; align-items: stretch; gap: 0; flex-shrink: 0; align-self: flex-start; height: 40px; margin-left: 8px; }
 .icon-button, .window-control { width: 37px; height: 37px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--muted-foreground); }
 .icon-button:hover, .window-control:hover { background: var(--accent); color: var(--primary); }
-.window-control { width: 43px; border-radius: 6px; }
-.tool-divider { width: 1px; height: 22px; background: var(--border); margin: 0 9px; }
+.window-control { width: 50px; height: 40px; border-radius: 0; }
+.window-control.close-window:hover { background: #e81123; color: #ffffff; }
+/* The empty space of the toolbar stays draggable; only the actual controls are not. */
+.comparison-tools.title-drag-zone { -webkit-app-region: drag; }
+.comparison-tools.title-drag-zone > * { -webkit-app-region: no-drag; }
 .badge-parent, .rail-icon { position: relative; }
 .count-badge { position: absolute; right: -1px; top: -3px; min-width: 17px; height: 17px; padding: 0 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; border-radius: 12px; background: var(--primary); color: var(--primary-foreground); }
 .desktop-workspace { display: flex; flex: 1; min-height: 0; padding: 0 12px 12px 0; }
@@ -204,13 +204,8 @@ body { background: var(--background); color: var(--foreground); }
 .total-item strong { font-size: 28px; font-weight: 500; line-height: 1.25; overflow-wrap: anywhere; }
 .total-item > div > span { font-size: 12px; color: var(--muted-foreground); }
 .dataset-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted-foreground); flex-shrink: 0; }
-.dataset-circle { width: 10px; height: 10px; border-radius: 50%; background: var(--color-slate-700); flex-shrink: 0; }
 .name-match-zero { color: var(--danger); }
 .name-match-positive { color: var(--success-foreground); }
-.dataset-badge { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 5px; background: #111827; color: #ffffff; font-weight: 700; line-height: 1; font-family: inherit; letter-spacing: 0; }
-.dark .dataset-badge { background: #f1f5f9; color: #0f172a; }
-.dataset-badge-md { width: 18px; height: 18px; font-size: 11px; }
-.dataset-badge-sm { width: 15px; height: 15px; font-size: 9px; border-radius: 4px; }
 .category-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
 .category-item { padding: 17px 16px; display: flex; align-items: center; gap: 14px; text-align: left; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
 .category-item:hover, .category-item.selected { background: var(--muted); border-color: var(--primary); }
@@ -285,10 +280,8 @@ body { background: var(--background); color: var(--foreground); }
   .window-bar { height: auto; min-height: 58px; flex-wrap: wrap; padding: 10px 12px; gap: 10px; }
   .window-brand { font-size: 14px; }
   .window-brand img { width: 27px; height: 27px; }
-  .window-tools { gap: 0; }
   .window-tools .icon-button { width: 30px; }
-  .tool-divider { margin: 0 3px; }
-  .comparison-tools { order: 3; width: 100%; flex-basis: 100%; gap: 6px; }
+    .comparison-tools { order: 3; width: 100%; flex-basis: 100%; gap: 6px; }
   .comparison-name { flex: 1; min-width: 0; max-width: none; }
   .save-comparison { width: 128px; padding: 0 8px; font-size: 12px; }
   .window-tools { margin-left: auto; }
@@ -386,7 +379,7 @@ body { background: var(--background); color: var(--foreground); }
 .category-item:hover, .category-item.selected { background: var(--status-surface); border-color: var(--status); }
 .diff-table .not-match-button { white-space: nowrap; }
 
-/* Dark feedback uses the same surfaces and accents as the workspace. */
+/* Toast colours in dark mode */
 .dark .action-toast { background: var(--muted); color: var(--foreground); border: 1px solid var(--border); }
 .dark .action-toast-icon { background: var(--accent); }
 .dark .action-toast-button { color: var(--primary); }
@@ -396,27 +389,12 @@ body { background: var(--background); color: var(--foreground); }
 .ui-button.not-match-button:hover { background-color: var(--muted); color: var(--color-amber-600); }
 .dark .ui-button.not-match-button:hover { color: var(--color-amber-300); }
 
-/* Increase row separation only in light mode; retain existing dark borders. */
+/* Stronger row dividers in light mode */
 :root:not(.dark) .workspace-content table tbody.divide-y > tr { border-color: var(--entry-divider); }
 
-/* Smooth light/dark switch: the new theme is revealed as an expanding circle */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
+/* Light/dark switch (see utils/themeTransition.ts) */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 ::view-transition-old(root) { z-index: 1; }
 ::view-transition-new(root) { z-index: 2; }
-html.theme-switching *,
-html.theme-switching *::before,
-html.theme-switching *::after {
-  transition: none !important;
-}
-
-/* Fallback for browsers without View Transitions: fade all colours together */
-html.theme-fade *,
-html.theme-fade *::before,
-html.theme-fade *::after {
-  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease,
-    fill 0.4s ease, stroke 0.4s ease, box-shadow 0.4s ease !important;
-}
+html.theme-switching * { transition: none !important; }
+html.theme-fade, html.theme-fade * { transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, fill 0.4s ease !important; }

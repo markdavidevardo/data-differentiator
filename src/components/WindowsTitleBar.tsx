@@ -23,7 +23,7 @@ export const WindowsTitleBar: React.FC<WindowsTitleBarProps> = ({ onUndo, onRedo
   useEffect(() => api?.onMaximizedChange(setIsMaximized), [api]);
   return <header className="window-bar title-drag">
     <div className="window-brand" title="Author: Mark David Evardo"><img src="./favicon.svg" alt="" /><span>Data Differentiator</span></div>
-    <div className="comparison-tools title-no-drag">
+    <div className="comparison-tools title-drag-zone">
       <div className="undo-tools">
         <Button className="icon-button" onClick={onUndo} disabled={!undoLabel} title={undoLabel ? `Undo: ${undoLabel} (Ctrl+Z)` : 'Nothing to undo'} aria-label="Undo"><Undo2 size={19} /></Button>
         <Button className="icon-button" onClick={onRedo} disabled={!redoLabel} title={redoLabel ? `Redo: ${redoLabel} (Ctrl+Y)` : 'Nothing to redo'} aria-label="Redo"><Redo2 size={19} /></Button>

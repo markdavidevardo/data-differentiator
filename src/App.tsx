@@ -5,7 +5,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRightLeft, AlertTriangle, ClipboardPaste, Download, LayoutDashboard, History, Trash2, Settings, Moon, Sun, Table2, X } from 'lucide-react';
+import { flushSync } from 'react-dom';
+import { ArrowRightLeft, AlertTriangle, ClipboardPaste, Download, LayoutDashboard, History, Eraser, Settings, Moon, Sun, Table2, X } from 'lucide-react';
 import { WindowsTitleBar } from './components/WindowsTitleBar';
 import { SummaryCards } from './components/SummaryCards';
 import { DiffTable } from './components/DiffTable';
@@ -18,10 +19,10 @@ import { SettingsModal } from './components/SettingsModal';
 import { ManualMatchModal } from './components/ManualMatchModal';
 import { ActionToast, type ToastMessage } from './components/ActionToast';
 import { Button } from './components/ui/Button';
+import { changeThemeSmoothly } from './utils/themeTransition';
 import { DataEntry, MatchedPair, differentiateGroups, normalizeName } from './utils/matcher';
 import { getHistory, saveHistorySession, HistorySession } from './utils/history';
 import { AppBackupData, AppTheme, clearStoredAppData } from './utils/backup';
-import { changeThemeSmoothly } from './utils/themeTransition';
 import {
   WorkspaceSnapshot,
   describeListChange,
@@ -61,7 +62,13 @@ const loadWorkspace = (): WorkspaceSnapshot => ({
 const quote = (name?: string) => `“${(name || '').trim() || 'Untitled'}”`;
 
 export default function App() {
-  const [workspace, setWorkspace] = useState<WorkspaceSnapshot>(loadWorkspace);
+  const [workspace, setWorkspaceState] = useState<WorkspaceSnapshot>(loadWorkspace);
+  // Always holds the newest workspace, so back-to-back edits never build on stale data.
+  const latest = useRef(workspace);
+  const setWorkspace = (next: WorkspaceSnapshot) => {
+    latest.current = next;
+    setWorkspaceState(next);
+  };
   const { row1, row2, rejectedPairs } = workspace;
   const manualPairs = workspace.manualPairs ?? {};
   const [undo, setUndo] = useState(emptyUndoState);
@@ -85,17 +92,6 @@ export default function App() {
     () => (localStorage.getItem(KEYS.theme) as AppTheme) || 'system'
   );
 
-  // Theme changes made by the user (toggle button, Settings) animate as one smooth reveal.
-  const changeTheme = useCallback((next: AppTheme) => {
-    const root = document.documentElement;
-    const willBeDark =
-      next === 'dark' || (next === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    changeThemeSmoothly(() => {
-      root.classList.toggle('dark', willBeDark);
-      setTheme(next);
-    }, root.classList.contains('dark') !== willBeDark);
-  }, []);
-
   const switchTab = (tab: Tab) => {
     const scroll = document.getElementById('app-scroll');
     if (scroll) tabScroll.current[activeTab] = scroll.scrollTop;
@@ -110,14 +106,37 @@ export default function App() {
   const showToast = (message: Omit<ToastMessage, 'id'>) => setToast({ ...message, id: Date.now() });
 
   // Every change to the datasets or "not match" list goes through here so it can be undone.
-  const commit = (next: Partial<WorkspaceSnapshot>, label: string, announce = false) => {
-    setUndo(prev => recordChange(prev, workspace, label));
-    setWorkspace(prev => ({ ...prev, ...next }));
+  // Pass a function to build the change from the newest data instead of a captured copy.
+  type Change = Partial<WorkspaceSnapshot> | ((current: WorkspaceSnapshot) => Partial<WorkspaceSnapshot>);
+  const commit = (change: Change, label: string, announce = false, mergeKey?: string) => {
+    const before = latest.current;
+    const next = { ...before, ...(typeof change === 'function' ? change(before) : change) };
+    setUndo(prev => recordChange(prev, before, label, Date.now(), mergeKey));
+    setWorkspace(next);
     if (announce) showToast({ kind: 'action', text: label });
   };
 
+  const commitList = (target: 'row1' | 'row2', update: (list: DataEntry[]) => DataEntry[]) => {
+    const before = latest.current[target];
+    const after = update(before);
+    commit({ [target]: after }, describeListChange(target === 'row1' ? 'Dataset A' : 'Dataset B', before, after));
+  };
+
+  // Typing in a cell changes only that one entry; each cell gets its own undo step so
+  // one undo never wipes out other edited entries.
+  const handleEditField = (target: 'row1' | 'row2', id: string, field: 'name' | 'contribution', value: string | number) => {
+    const entry = latest.current[target].find(item => item.id === id);
+    const dataset = target === 'row1' ? 'Dataset A' : 'Dataset B';
+    commit(
+      current => ({ [target]: current[target].map(item => (item.id === id ? { ...item, [field]: value } : item)) }),
+      `Edited ${quote(entry?.name)} in ${dataset}`,
+      false,
+      `edit:${target}:${id}:${field}`
+    );
+  };
+
   const handleUndo = useCallback(() => {
-    const step = undoStep(undo, workspace);
+    const step = undoStep(undo, latest.current);
     if (!step) {
       showToast({ kind: 'info', text: 'Nothing to undo' });
       return;
@@ -125,10 +144,10 @@ export default function App() {
     setUndo(step.state);
     setWorkspace(step.restore);
     showToast({ kind: 'undo', text: step.label, remaining: step.state.past.length });
-  }, [undo, workspace]);
+  }, [undo]);
 
   const handleRedo = useCallback(() => {
-    const step = redoStep(undo, workspace);
+    const step = redoStep(undo, latest.current);
     if (!step) {
       showToast({ kind: 'info', text: 'Nothing to redo' });
       return;
@@ -136,7 +155,7 @@ export default function App() {
     setUndo(step.state);
     setWorkspace(step.restore);
     showToast({ kind: 'redo', text: step.label, remaining: step.state.future.length });
-  }, [undo, workspace]);
+  }, [undo]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -155,6 +174,19 @@ export default function App() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleUndo, handleRedo]);
+
+  const changeTheme = (next: AppTheme) => {
+    const root = document.documentElement;
+    const willBeDark = next === 'dark' || (next === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    changeThemeSmoothly(
+      () => {
+        root.classList.toggle('dark', willBeDark);
+        setTheme(next);
+      },
+      root.classList.contains('dark') !== willBeDark,
+      flushSync
+    );
+  };
 
   useEffect(() => {
     localStorage.setItem(KEYS.theme, theme);
@@ -198,24 +230,23 @@ export default function App() {
 
   const handleBulkImport = (records: DataEntry[], target: 'row1' | 'row2', mode: 'append' | 'replace') => {
     const dataset = target === 'row1' ? 'Dataset A' : 'Dataset B';
-    const current = workspace[target];
-    const next = mode === 'append' ? [...current, ...records] : records;
     const label = mode === 'append'
       ? `Pasted ${records.length} ${records.length === 1 ? 'entry' : 'entries'} into ${dataset}`
       : `Replaced ${dataset} with ${records.length} ${records.length === 1 ? 'entry' : 'entries'}`;
-    commit({ [target]: next }, label, true);
+    commit(current => ({ [target]: mode === 'append' ? [...current[target], ...records] : records }), label, true);
   };
 
   const handleUnmatchPair = (pair: MatchedPair) => {
-    if (!pair.row1Record || !pair.row2Record) return;
-    const idKey = `${pair.row1Record.id}:::${pair.row2Record.id}`;
-    const nameKey = `${normalizeName(pair.row1Record.name)}:::${normalizeName(pair.row2Record.name)}`;
-    const next = [...new Set([...rejectedPairs, idKey, nameKey])];
-    const nextManual = { ...manualPairs };
-    if (nextManual[pair.row1Record.id] === pair.row2Record.id) delete nextManual[pair.row1Record.id];
+    const { row1Record: a, row2Record: b } = pair;
+    if (!a || !b) return;
     commit(
-      { rejectedPairs: next, manualPairs: nextManual },
-      `Marked ${quote(pair.row1Record.name)} and ${quote(pair.row2Record.name)} as not a match`,
+      current => {
+        const manual = { ...current.manualPairs };
+        if (manual[a.id] === b.id) delete manual[a.id];
+        const rejected = new Set([...current.rejectedPairs, `${a.id}:::${b.id}`, `${normalizeName(a.name)}:::${normalizeName(b.name)}`]);
+        return { rejectedPairs: [...rejected], manualPairs: manual };
+      },
+      `Marked ${quote(a.name)} and ${quote(b.name)} as not a match`,
       true
     );
   };
@@ -225,12 +256,12 @@ export default function App() {
     const b = source.row2Record ?? target;
     const idKey = `${a.id}:::${b.id}`;
     const nameKey = `${normalizeName(a.name)}:::${normalizeName(b.name)}`;
-    const nextManual = Object.fromEntries(
-      Object.entries(manualPairs).filter(([r1, r2]) => r1 !== a.id && r2 !== b.id)
-    );
-    nextManual[a.id] = b.id;
     commit(
-      { manualPairs: nextManual, rejectedPairs: rejectedPairs.filter(k => k !== idKey && k !== nameKey) },
+      current => {
+        const manual = Object.fromEntries(Object.entries(current.manualPairs ?? {}).filter(([r1, r2]) => r1 !== a.id && r2 !== b.id));
+        manual[a.id] = b.id;
+        return { manualPairs: manual, rejectedPairs: current.rejectedPairs.filter(k => k !== idKey && k !== nameKey) };
+      },
       `Matched ${quote(a.name)} with ${quote(b.name)}`,
       true
     );
@@ -254,7 +285,7 @@ export default function App() {
       u ? list.map(item => (item.id === u.id ? { ...item, name: u.name, contribution: u.contribution } : item)) : list;
     const name = updates.row1Update?.name || updates.row2Update?.name;
     commit(
-      { row1: apply(row1, updates.row1Update), row2: apply(row2, updates.row2Update) },
+      current => ({ row1: apply(current.row1, updates.row1Update), row2: apply(current.row2, updates.row2Update) }),
       `Edited ${quote(name)}`,
       true
     );
@@ -262,10 +293,10 @@ export default function App() {
 
   const handleDeletePair = (pair: MatchedPair) => {
     commit(
-      {
-        row1: pair.row1Record ? row1.filter(item => item.id !== pair.row1Record?.id) : row1,
-        row2: pair.row2Record ? row2.filter(item => item.id !== pair.row2Record?.id) : row2,
-      },
+      current => ({
+        row1: pair.row1Record ? current.row1.filter(item => item.id !== pair.row1Record?.id) : current.row1,
+        row2: pair.row2Record ? current.row2.filter(item => item.id !== pair.row2Record?.id) : current.row2,
+      }),
       `Deleted ${quote(pair.row1Record?.name || pair.row2Record?.name)}`,
       true
     );
@@ -374,7 +405,7 @@ export default function App() {
             <span>History</span>
           </Button>
           <Button className="rail-item" aria-label="Clear workspace" title="Clear workspace" onClick={() => setIsClearConfirmOpen(true)}>
-            <span className="rail-icon"><Trash2 size={22} /></span><span>Trash</span>
+            <span className="rail-icon"><Eraser size={22} /></span><span>Clear</span>
           </Button>
           <Button className="rail-item" aria-label="Settings" title="Settings" onClick={() => setIsSettingsOpen(true)}>
             <span className="rail-icon"><Settings size={22} /></span><span>Settings</span>
@@ -451,8 +482,9 @@ export default function App() {
               <RowDataEditor
                 row1={row1}
                 row2={row2}
-                onUpdateRow1={next => commit({ row1: next }, describeListChange('Dataset A', row1, next))}
-                onUpdateRow2={next => commit({ row2: next }, describeListChange('Dataset B', row2, next))}
+                onUpdateRow1={update => commitList('row1', update)}
+                onUpdateRow2={update => commitList('row2', update)}
+                onEditField={handleEditField}
                 onOpenBulkImport={setBulkImportTarget}
               />
             </div>

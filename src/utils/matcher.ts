@@ -1,10 +1,10 @@
 /**
- * Comparison engine for Data Differentiator.
+ * Data Differentiator Engine
+ * General-purpose 2-subsection data comparison:
+ * Subsection 1: Alphanumeric String (symbols ignored)
+ * Subsection 2: Numerical Value (symbols ignored, thousands commas preserved)
  *
- * Each entry has a name (letters and numbers; symbols are ignored) and a value
- * (symbols ignored, thousands commas kept).
- *
- * Author: Mark David Evardo
+ * Developed by: Mark David Evardo
  */
 
 export interface DataEntry {
@@ -411,11 +411,11 @@ export function differentiateGroups(
 }
 
 /**
- * Parses freeform pasted text into DataEntry records.
+ * Parses freeform pasted text into DataEntry records with zero conditions.
  *
- * Names: wide spaces are collapsed and multi-column names (Surname, First Name,
- * Middle Name) are joined without dropping any part.
- * Values: symbols are ignored and thousands commas are kept.
+ * Subsection 1: Alphanumeric String (automatically collapses wide spaces and joins
+ * multi-column names such as Surname, First Name, Middle Name without dropping any parts).
+ * Subsection 2: Numerical Value (symbols ignored, thousands commas preserved).
  */
 export function parsePastedRecords(
   rawText: string,

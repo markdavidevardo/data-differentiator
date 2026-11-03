@@ -1,18 +1,13 @@
-# Dependencies and build output
 node_modules/
 dist/
 release/
 coverage/
 *.tsbuildinfo
-
-# Environment and local files
 .env
 .env.*
 !.env.example
 .DS_Store
 Thumbs.db
 *.log
-
-# Never commit real data exports or backups
 Data_Differentiator_Backup_*.json
 *.csv

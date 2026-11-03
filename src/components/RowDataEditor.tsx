@@ -7,17 +7,41 @@ import { Plus, Trash2, ClipboardPaste } from 'lucide-react';
 interface RowDataEditorProps {
   row1: DataEntry[];
   row2: DataEntry[];
-  onUpdateRow1: (records: DataEntry[]) => void;
-  onUpdateRow2: (records: DataEntry[]) => void;
+  onUpdateRow1: (update: (list: DataEntry[]) => DataEntry[]) => void;
+  onUpdateRow2: (update: (list: DataEntry[]) => DataEntry[]) => void;
+  onEditField: (target: 'row1' | 'row2', id: string, field: 'name' | 'contribution', value: string | number) => void;
   onOpenBulkImport: (targetGroup: 'row1' | 'row2') => void;
   agency?: string;
 }
+
+/** Number field that keeps what the user is typing ("1.", "-", empty) instead of snapping back to 0. */
+const NumberCell: React.FC<{ value: number; onCommit: (value: number) => void; className?: string }> = ({ value, onCommit, className }) => {
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <input
+      type="number"
+      step="any"
+      value={draft ?? value}
+      onChange={e => {
+        setDraft(e.target.value);
+        const parsed = parseFloat(e.target.value);
+        if (!Number.isNaN(parsed)) onCommit(parsed);
+      }}
+      onBlur={() => {
+        if (draft !== null && Number.isNaN(parseFloat(draft))) onCommit(0);
+        setDraft(null);
+      }}
+      className={className}
+    />
+  );
+};
 
 export const RowDataEditor: React.FC<RowDataEditorProps> = ({
   row1,
   row2,
   onUpdateRow1,
   onUpdateRow2,
+  onEditField,
   onOpenBulkImport,
 }) => {
   const [page1, setPage1] = useState(0);
@@ -51,7 +75,7 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
       name: cleanName,
       contribution: amount,
     };
-    onUpdateRow1([...row1, newRecord]);
+    onUpdateRow1(list => [...list, newRecord]);
     setNewR1Name('');
     setNewR1Amount('');
   };
@@ -66,31 +90,27 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
       name: cleanName,
       contribution: amount,
     };
-    onUpdateRow2([...row2, newRecord]);
+    onUpdateRow2(list => [...list, newRecord]);
     setNewR2Name('');
     setNewR2Amount('');
   };
 
-  const updateRow1Field = (id: string, field: keyof DataEntry, value: any) => {
+  const updateRow1Field = (id: string, field: 'name' | 'contribution', value: any) => {
     const finalVal = field === 'name' ? String(value).replace(/\s{2,}/g, ' ') : value;
-    onUpdateRow1(
-      row1.map(item => (item.id === id ? { ...item, [field]: finalVal } : item))
-    );
+    onEditField('row1', id, field, finalVal);
   };
 
-  const updateRow2Field = (id: string, field: keyof DataEntry, value: any) => {
+  const updateRow2Field = (id: string, field: 'name' | 'contribution', value: any) => {
     const finalVal = field === 'name' ? String(value).replace(/\s{2,}/g, ' ') : value;
-    onUpdateRow2(
-      row2.map(item => (item.id === id ? { ...item, [field]: finalVal } : item))
-    );
+    onEditField('row2', id, field, finalVal);
   };
 
   const deleteRow1 = (id: string) => {
-    onUpdateRow1(row1.filter(item => item.id !== id));
+    onUpdateRow1(list => list.filter(item => item.id !== id));
   };
 
   const deleteRow2 = (id: string) => {
-    onUpdateRow2(row2.filter(item => item.id !== id));
+    onUpdateRow2(list => list.filter(item => item.id !== id));
   };
 
   return (
@@ -108,7 +128,7 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
                 <div className="flex items-center gap-1">
                   <Button
                     onClick={() => {
-                      onUpdateRow1([]);
+                      onUpdateRow1(() => []);
                       setConfirmClearGroup(null);
                     }}
                     className="px-2 py-0.5 text-xs bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition-colors"
@@ -204,15 +224,7 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
                       />
                     </td>
                     <td className="py-1 px-3 font-mono">
-                      <input
-                        type="number"
-                        step="any"
-                        value={rec.contribution}
-                        onChange={e =>
-                          updateRow1Field(rec.id, 'contribution', parseFloat(e.target.value) || 0)
-                        }
-                        className="w-full px-2 py-1 bg-transparent hover:bg-slate-100/70 dark:hover:bg-slate-700/70 focus:bg-white dark:focus:bg-slate-900 focus:ring-1 focus:ring-blue-500 rounded text-xs text-slate-800 dark:text-slate-200 font-mono tabular-nums transition-colors"
-                      />
+                      <NumberCell value={rec.contribution} onCommit={value => updateRow1Field(rec.id, 'contribution', value)} className="w-full px-2 py-1 bg-transparent hover:bg-slate-100/70 dark:hover:bg-slate-700/70 focus:bg-white dark:focus:bg-slate-900 focus:ring-1 focus:ring-blue-500 rounded text-xs text-slate-800 dark:text-slate-200 font-mono tabular-nums transition-colors" />
                     </td>
                     <td className="py-1 px-3 text-center">
                       <Button
@@ -253,7 +265,7 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
                 <div className="flex items-center gap-1">
                   <Button
                     onClick={() => {
-                      onUpdateRow2([]);
+                      onUpdateRow2(() => []);
                       setConfirmClearGroup(null);
                     }}
                     className="px-2 py-0.5 text-xs bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition-colors"
@@ -349,15 +361,7 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
                       />
                     </td>
                     <td className="py-1 px-3 font-mono">
-                      <input
-                        type="number"
-                        step="any"
-                        value={rec.contribution}
-                        onChange={e =>
-                          updateRow2Field(rec.id, 'contribution', parseFloat(e.target.value) || 0)
-                        }
-                        className="w-full px-2 py-1 bg-transparent hover:bg-slate-100/70 dark:hover:bg-slate-700/70 focus:bg-white dark:focus:bg-slate-900 focus:ring-1 focus:ring-blue-500 rounded text-xs text-blue-900 dark:text-blue-200 font-mono tabular-nums transition-colors"
-                      />
+                      <NumberCell value={rec.contribution} onCommit={value => updateRow2Field(rec.id, 'contribution', value)} className="w-full px-2 py-1 bg-transparent hover:bg-slate-100/70 dark:hover:bg-slate-700/70 focus:bg-white dark:focus:bg-slate-900 focus:ring-1 focus:ring-blue-500 rounded text-xs text-blue-900 dark:text-blue-200 font-mono tabular-nums transition-colors" />
                     </td>
                     <td className="py-1 px-3 text-center">
                       <Button

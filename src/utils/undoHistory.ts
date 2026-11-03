@@ -12,6 +12,8 @@ export interface UndoEntry {
   label: string;
   snapshot: WorkspaceSnapshot;
   at: number;
+  /** Groups rapid edits of the same cell; defaults to the label. */
+  key?: string;
 }
 
 export interface UndoState {
@@ -30,15 +32,16 @@ export function recordChange(
   state: UndoState,
   before: WorkspaceSnapshot,
   label: string,
-  now = Date.now()
+  now = Date.now(),
+  key: string = label
 ): UndoState {
   const last = state.past[state.past.length - 1];
-  if (last && last.label === label && now - last.at < MERGE_WINDOW_MS) {
+  if (last && (last.key ?? last.label) === key && now - last.at < MERGE_WINDOW_MS) {
     const past = [...state.past];
     past[past.length - 1] = { ...last, at: now };
     return { past, future: [] };
   }
-  const past = [...state.past, { label, snapshot: before, at: now }].slice(-UNDO_LIMIT);
+  const past = [...state.past, { label, snapshot: before, at: now, key }].slice(-UNDO_LIMIT);
   return { past, future: [] };
 }
 
