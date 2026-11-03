@@ -1,5 +1,4 @@
 import { Button } from './ui/Button';
-import { DatasetBadge } from './DatasetBadge';
 import React, { useState, useEffect } from 'react';
 import { X, Pencil, Check } from 'lucide-react';
 import { MatchedPair, DataEntry, cleanNumberInput } from '../utils/matcher';
@@ -97,22 +96,21 @@ export const EditPairModal: React.FC<EditPairModalProps> = ({
           {pair.row1Record && (
             <div className="p-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
               <div className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1.5">
-                <DatasetBadge dataset="A" size="sm" />
                 <span>Dataset A</span>
               </div>
               <div className="space-y-1.5">
-                <label className="text-slate-600 dark:text-slate-300 font-medium">Panel 1 (String):</label>
+                <label className="text-slate-600 dark:text-slate-300 font-medium">Name</label>
                 <input
                   type="text"
                   value={row1Name}
                   onChange={e => setRow1Name(e.target.value)}
                   required
-                  placeholder="Employee name or string identifier..."
+                  placeholder="Name"
                   className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-slate-600 dark:text-slate-300 font-medium">Panel 2 (Numerical Value):</label>
+                <label className="text-slate-600 dark:text-slate-300 font-medium">Value</label>
                 <input
                   type="number"
                   step="any"
@@ -130,22 +128,21 @@ export const EditPairModal: React.FC<EditPairModalProps> = ({
           {pair.row2Record && (
             <div className="p-3.5 bg-blue-50/50 dark:bg-blue-950/50 rounded-xl border border-blue-200/80 dark:border-blue-800/80 space-y-3">
               <div className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1.5">
-                <DatasetBadge dataset="B" size="sm" />
                 <span>Dataset B</span>
               </div>
               <div className="space-y-1.5">
-                <label className="text-blue-900 dark:text-blue-200 font-medium">Panel 1 (String):</label>
+                <label className="text-blue-900 dark:text-blue-200 font-medium">Name</label>
                 <input
                   type="text"
                   value={row2Name}
                   onChange={e => setRow2Name(e.target.value)}
                   required
-                  placeholder="Employee name or string identifier..."
+                  placeholder="Name"
                   className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-blue-900 dark:text-blue-200 font-medium">Panel 2 (Numerical Value):</label>
+                <label className="text-blue-900 dark:text-blue-200 font-medium">Value</label>
                 <input
                   type="number"
                   step="any"

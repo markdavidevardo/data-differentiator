@@ -52,3 +52,10 @@ describe('undo history', () => {
     assert.equal(describeListChange('Dataset A', two, []), 'Cleared Dataset A');
   });
 });
+
+it('edits to different entries get separate undo steps even when typed quickly', () => {
+  let s = recordChange(emptyUndoState(), snap(), 'Edited A', 1000, 'edit:row1:a:name');
+  s = recordChange(s, snap(), 'Edited B', 1100, 'edit:row1:b:name');
+  s = recordChange(s, snap(), 'Edited B', 1200, 'edit:row1:b:name');
+  assert.equal(s.past.length, 2);
+});

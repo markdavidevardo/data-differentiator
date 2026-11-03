@@ -278,10 +278,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     Data Differentiator
                   </h4>
                   <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold">
-                    Version 1
+                    Version 1.2.0
                   </p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Compares two lists, matches similar names and shows what changed.
+                    High-speed fuzzy string comparison and numerical value differentiation engine.
                   </p>
                 </div>
               </div>
@@ -315,7 +315,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
                 </div>
                 <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Made for quickly comparing names, rearranged names and numbers without strict matching rules.
+                  Built to empower fast, zero-condition data differentiation across alphanumeric identifiers, rearranged names, and numerical values without restrictive matching constraints.
                 </p>
               </div>
             </div>

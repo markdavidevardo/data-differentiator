@@ -1,52 +1,36 @@
 # Data Differentiator
 
-A desktop app for Windows that compares two lists of names and values, matches similar names even when they are spelled or ordered differently, and shows what is identical, changed, or missing. It works fully offline.
+An offline Windows app that compares two lists of names and values, matches similar names and shows what changed.
+
+Built with TypeScript, React, Vite, Tailwind CSS and Electron.
 
 ## Features
+- Paste or type two datasets and see matches, changed values and entries that appear in only one list.
+- Fuzzy name matching, with manual matching and "Not Match" overrides.
+- Undo and redo for every change.
+- History of saved comparisons, JSON backup and restore, PDF and CSV export.
+- Light, dark or automatic theme.
 
-- Paste lists straight from Excel, or type entries by hand
-- Fuzzy name matching that ignores capitalization, symbols and word order
-- Dashboard with totals, differences and filters for each status
-- Manual matching, "Not a match" splitting, and A → Z / Z → A sorting
-- Undo and redo for every change
-- Save comparisons to History and restore them later
-- Export results to PDF or CSV
-- Backup and restore all data as a JSON file
-- Light, dark and automatic themes
+## Development
+Requires Node.js 22 or newer.
 
-## Getting started
-
-You need [Node.js](https://nodejs.org) 22 or newer.
-
-```bash
-npm install
-npm run dev
 ```
-
-Other commands:
-
-```bash
-npm run build   # production build of the web app
-npm run lint    # type check
-npm test        # unit tests
-npm run electron  # run the desktop app (after npm run build)
+npm install
+npm run dev        # run in the browser at http://localhost:3000
+npm test           # unit tests
+npm run lint       # type check
+npm run electron   # run the desktop app (after npm run build)
 ```
 
 ## Build the Windows app
+Double-click `build-app.bat`, or run:
 
-On Windows, double-click `build-app.bat`, or run:
-
-```bash
+```
+npm ci
 npm run dist
 ```
 
-The installer and the portable version are created in the `release` folder.
-
-## Notes
-
-- All data is stored locally on your computer. Nothing is uploaded.
-- Do not commit exported backups or real data files to this repository.
+The `release` folder will contain `DataDifferentiator-Setup.exe` and `DataDifferentiator-Portable.exe`.
 
 ## Author
-
 Mark David Evardo
