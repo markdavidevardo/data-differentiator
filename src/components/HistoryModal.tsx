@@ -241,7 +241,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                           <strong>{formatValue(session.row1TotalAmount)}</strong> ({session.row1Count} entries)
                         </div>
                         <span className="text-slate-300">·</span>
-                        <div className="font-mono text-blue-700 dark:text-blue-300">
+                        <div className="font-mono text-slate-700 dark:text-slate-300">
                           <span className="text-slate-400 font-sans">Dataset B: </span>
                           <strong>{formatValue(session.row2TotalAmount)}</strong> ({session.row2Count} entries)
                         </div>

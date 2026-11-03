@@ -296,13 +296,13 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
               <ClipboardPaste className="w-3.5 h-3.5" />
               <span>Bulk Paste</span>
             </Button>
-            <span className="text-xs px-2 py-0.5 bg-blue-200 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 font-mono font-semibold rounded">
+            <span className="text-xs px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono font-semibold rounded">
               {row2.length}
             </span>
           </div>
         </div>
 
-        <form onSubmit={handleAddRow2} className="p-3 bg-blue-50/40 dark:bg-blue-950/40 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
+        <form onSubmit={handleAddRow2} className="p-3 bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
           <input
             type="text"
             placeholder="Name"
@@ -321,7 +321,7 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
           </div>
           <Button
             type="submit"
-            className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shrink-0 transition-all shadow-xs"
+            className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shrink-0 transition-all shadow-xs"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add</span>
@@ -383,7 +383,7 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
         <PageControls page={page2} count={row2.length} onChange={setPage2} />
         <div className="p-3 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
           <span className="text-slate-500 dark:text-slate-400 font-medium">Dataset B Subtotal:</span>
-          <span className="font-bold text-blue-700 dark:text-blue-300 font-mono tabular-nums">
+          <span className="font-bold text-slate-800 dark:text-slate-200 font-mono tabular-nums">
             {formatValue(row2.reduce((sum, r) => sum + (r.contribution || 0), 0))}
           </span>
         </div>

@@ -126,12 +126,12 @@ export const EditPairModal: React.FC<EditPairModalProps> = ({
           )}
 
           {pair.row2Record && (
-            <div className="p-3.5 bg-blue-50/50 dark:bg-blue-950/50 rounded-xl border border-blue-200/80 dark:border-blue-800/80 space-y-3">
+            <div className="p-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
               <div className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1.5">
                 <span>Dataset B</span>
               </div>
               <div className="space-y-1.5">
-                <label className="text-blue-900 dark:text-blue-200 font-medium">Name</label>
+                <label className="text-slate-600 dark:text-slate-300 font-medium">Name</label>
                 <input
                   type="text"
                   value={row2Name}
@@ -142,7 +142,7 @@ export const EditPairModal: React.FC<EditPairModalProps> = ({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-blue-900 dark:text-blue-200 font-medium">Value</label>
+                <label className="text-slate-600 dark:text-slate-300 font-medium">Value</label>
                 <input
                   type="number"
                   step="any"
