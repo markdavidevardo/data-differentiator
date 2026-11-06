@@ -1,9 +1,3 @@
-/**
- * Data Differentiator
- * SPDX-License-Identifier: Apache-2.0
- * Copyright (c) Mark David Evardo
- */
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { ArrowRightLeft, AlertTriangle, ClipboardPaste, Download, LayoutDashboard, History, Eraser, Settings, Moon, Sun, Table2, X } from 'lucide-react';
@@ -20,6 +14,7 @@ import { ManualMatchModal } from './components/ManualMatchModal';
 import { ActionToast, type ToastMessage } from './components/ActionToast';
 import { Button } from './components/ui/Button';
 import { changeThemeSmoothly } from './utils/themeTransition';
+import { copyScreenText } from './utils/copyText';
 import { DataEntry, MatchedPair, differentiateGroups, normalizeName } from './utils/matcher';
 import { getHistory, saveHistorySession, HistorySession } from './utils/history';
 import { AppBackupData, AppTheme, clearStoredAppData } from './utils/backup';
@@ -174,6 +169,26 @@ export default function App() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleUndo, handleRedo]);
+
+  const copyScreen = useCallback(async () => {
+    const lines = await copyScreenText();
+    showToast({ kind: 'info', text: lines ? `Copied ${lines} lines of text` : 'Nothing to copy on this screen' });
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'c') {
+        e.preventDefault();
+        copyScreen();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    const stopListening = window.electronAPI?.onCopyScreen?.(copyScreen);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      stopListening?.();
+    };
+  }, [copyScreen]);
 
   const changeTheme = (next: AppTheme) => {
     const root = document.documentElement;

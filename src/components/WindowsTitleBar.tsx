@@ -9,6 +9,8 @@ declare global {
       toggleMaximize: () => void;
       close: () => void;
       openExternal?: (url: string) => void;
+      copyText?: (text: string) => void;
+      onCopyScreen?: (cb: () => void) => () => void;
       onMaximizedChange: (cb: (maximized: boolean) => void) => () => void;
     };
   }

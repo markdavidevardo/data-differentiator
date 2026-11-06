@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, shell, clipboard } = require('electron');
 const path = require('path');
 
 let win;
@@ -44,6 +44,28 @@ function createWindow() {
     }
   });
 
+  // Right-click menu: copy, paste and select all work on any text in the app.
+  win.webContents.on('context-menu', (_event, params) => {
+    const { isEditable, selectionText, editFlags } = params;
+    const hasSelection = selectionText.trim().length > 0;
+    const items = [];
+    if (isEditable) {
+      items.push(
+        { role: 'cut', enabled: editFlags.canCut },
+        { role: 'copy', enabled: editFlags.canCopy },
+        { role: 'paste', enabled: editFlags.canPaste }
+      );
+    } else if (hasSelection) {
+      items.push({ role: 'copy' });
+    }
+    if (items.length) items.push({ type: 'separator' });
+    items.push(
+      { role: 'selectAll', label: 'Select all' },
+      { label: 'Copy all text on this screen', accelerator: 'CmdOrCtrl+Shift+C', click: () => win.webContents.send('app:copy-screen') }
+    );
+    Menu.buildFromTemplate(items).popup({ window: win });
+  });
+
   const sendState = () => win && !win.isDestroyed() &&
     win.webContents.send('window:maximized', win.isMaximized());
   win.on('maximize', sendState);
@@ -58,6 +80,7 @@ ipcMain.on('window:toggle-maximize', () => {
 });
 ipcMain.on('window:close', () => win && win.close());
 ipcMain.on('app:open-external', (_e, url) => openInBrowser(String(url)));
+ipcMain.on('app:copy-text', (_e, text) => clipboard.writeText(String(text)));
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();

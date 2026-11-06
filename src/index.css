@@ -398,3 +398,7 @@ body { background: var(--background); color: var(--foreground); }
 ::view-transition-new(root) { z-index: 2; }
 html.theme-switching * { transition: none !important; }
 html.theme-fade, html.theme-fade * { transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, fill 0.4s ease !important; }
+
+/* Text can be selected and copied everywhere except on the window chrome and controls */
+.window-bar, .navigation-rail, button, .title-drag { user-select: none; }
+.workspace-content, [role="dialog"], .fixed.inset-0 { user-select: text; }

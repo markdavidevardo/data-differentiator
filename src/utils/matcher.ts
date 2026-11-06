@@ -1,16 +1,10 @@
-/**
- * Data Differentiator Engine
- * General-purpose 2-subsection data comparison:
- * Subsection 1: Alphanumeric String (symbols ignored)
- * Subsection 2: Numerical Value (symbols ignored, thousands commas preserved)
- *
- * Developed by: Mark David Evardo
- */
+// Matching and comparison logic for Data Differentiator.
+// Names are compared without symbols or accents; values keep their thousands commas.
 
 export interface DataEntry {
   id: string;
-  name: string; // Subsection 1: Alphanumeric string identifier (name, title, item, label)
-  contribution: number; // Subsection 2: Numerical value
+  name: string;
+  contribution: number;
   agency?: string;
   referenceId?: string;
   department?: string;
@@ -52,10 +46,8 @@ export interface ReconciliationSummary {
   highMatchCount: number;
 }
 
-/**
- * Normalizes text: strictly strips ALL non-alphanumeric symbols and accents,
- * leaving only clean alphanumeric characters (a-z0-9) and single spaces.
- */
+// Lowercases and strips accents and symbols, leaving letters, digits and single spaces.
+
 export function normalizeName(str: string): string {
   if (!str) return '';
   return str
@@ -67,17 +59,14 @@ export function normalizeName(str: string): string {
     .trim();
 }
 
-/**
- * Extracts distinct tokens while cleaning common suffixes/prefixes.
- */
+// Splits a name into unique words, joining particles like "de la" or "van der" to the next word.
+
 export function extractNameTokens(name: string): string[] {
   const normalized = normalizeName(name);
   if (!normalized) return [];
 
-  // Split into raw words
   const words = normalized.split(' ').filter(w => w.length > 0);
   
-  // Standardize common compound words/names
   const tokens: string[] = [];
   const ignoredSuffixes = new Set(['jr', 'sr', 'ii', 'iii', 'iv', 'v', 'mr', 'ms', 'mrs', 'dr']);
 
@@ -106,9 +95,8 @@ export function extractNameTokens(name: string): string[] {
   return unique.length > 1 ? unique.filter(t => t.length > 1) : unique;
 }
 
-/**
- * Levenshtein Distance for fuzzy string comparison.
- */
+// Edit distance between two words.
+
 export function levenshteinDistance(a: string, b: string): number {
   if (a === b) return 0;
   if (!a.length) return b.length;
@@ -127,9 +115,8 @@ export function levenshteinDistance(a: string, b: string): number {
   return row[b.length];
 }
 
-/**
- * Similarity ratio between two single words (0 to 1).
- */
+// 0 to 1 similarity between two words.
+
 export function wordSimilarity(w1: string, w2: string): number {
   if (w1 === w2) return 1.0;
   const clean1 = w1.replace(/\s+/g, '');
@@ -150,9 +137,8 @@ export function wordSimilarity(w1: string, w2: string): number {
   return Math.max(0, 1 - dist / maxLen);
 }
 
-/**
- * Computes string similarity score and finds distinct similarities.
- */
+// Scores how alike two names are, word by word.
+
 export function evaluateNameSimilarity(name1: string, name2: string): {
   score: number;
   matchedTokens: string[];
@@ -228,9 +214,8 @@ export function evaluateNameSimilarity(name1: string, name2: string): {
   };
 }
 
-/**
- * Main differentiation engine: compares Dataset A (Baseline) and Dataset B (Current).
- */
+// Compares Dataset A (before) with Dataset B (after).
+
 export function differentiateGroups(
   row1: DataEntry[],
   row2: DataEntry[],
@@ -250,7 +235,7 @@ export function differentiateGroups(
   const assignedRow2Ids = new Set<string>();
   const manuallyPairedRow1 = new Set<string>();
 
-  // 1. Process Manual Pairs first if any
+  // Manual links first
   for (const [r1Id, r2Id] of Object.entries(manualPairs)) {
     const pairKey = `${r1Id}:::${r2Id}`;
     if (rejectedPairsSet.has(pairKey)) continue;
@@ -280,7 +265,7 @@ export function differentiateGroups(
     }
   }
 
-  // 2. Automated Smart Matching
+  // Then automatic matching
   const remainingRow1 = row1.filter(r1 => !manuallyPairedRow1.has(r1.id));
 
   for (const rec1 of remainingRow1) {
@@ -328,11 +313,11 @@ export function differentiateGroups(
 
       let explanation = '';
       if (bestMatch.score === 100) {
-        explanation = 'Exact match on string identifier';
+        explanation = 'Exact name match';
       } else if (bestMatch.distinctCount >= 2) {
-        explanation = `Matched via ${bestMatch.distinctCount} distinct string similarities: [${bestMatch.matchedTokens.join(', ')}]`;
+        explanation = `Shared words: ${bestMatch.matchedTokens.join(', ')}`;
       } else {
-        explanation = `Fuzzy string match (${bestMatch.score}% similarity)`;
+        explanation = `Similar names (${bestMatch.score}% match)`;
       }
 
       pairs.push({
@@ -365,7 +350,7 @@ export function differentiateGroups(
     }
   }
 
-  // 3. Find Unmatched Dataset B records
+  // Whatever is left in Dataset B has no partner
   for (const rec2 of row2) {
     if (!assignedRow2Ids.has(rec2.id)) {
       pairs.push({
@@ -383,7 +368,7 @@ export function differentiateGroups(
     }
   }
 
-  // Calculate Summary
+  // Totals
   const row1TotalAmount = row1.reduce((sum, r) => sum + (r.contribution || 0), 0);
   const row2TotalAmount = row2.reduce((sum, r) => sum + (r.contribution || 0), 0);
   const netAmountDifference = row2TotalAmount - row1TotalAmount;
@@ -410,13 +395,8 @@ export function differentiateGroups(
   return { pairs, summary };
 }
 
-/**
- * Parses freeform pasted text into DataEntry records with zero conditions.
- *
- * Subsection 1: Alphanumeric String (automatically collapses wide spaces and joins
- * multi-column names such as Surname, First Name, Middle Name without dropping any parts).
- * Subsection 2: Numerical Value (symbols ignored, thousands commas preserved).
- */
+// Turns pasted text (Excel, CSV or plain lines) into entries: a name plus a value on each line.
+
 export function parsePastedRecords(
   rawText: string,
   defaultAgency: 'SSS' | 'PhilHealth' | 'Pag-IBIG' | 'General' = 'General'
@@ -426,9 +406,8 @@ export function parsePastedRecords(
   const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
   const records: DataEntry[] = [];
 
-  // Helper to test if a token is a numerical value
   const parseAmountFromToken = (token: string): number | null => {
-    // Strip leading currency symbols, currency codes, spaces, quotes
+    // Drop currency signs, codes and quotes
     const cleaned = token
       .replace(/^["'“”‘’₱$€£¥\s]+|["'“”‘’\s]+$/g, '')
       .replace(/^(?:PHP|USD|EUR|GBP)\s*/i, '')
@@ -439,7 +418,6 @@ export function parsePastedRecords(
     return isNaN(num) ? null : num;
   };
 
-  // Helper to clean name string (collapsing all long spaces, removing wrapping quotes)
   const cleanNameString = (str: string): string => {
     return str
       .replace(/^["'“”‘’\s]+|["'“”‘’\s]+$/g, '')
@@ -494,15 +472,15 @@ export function parsePastedRecords(
           refId = tokens.slice(amountIndex + 1).join(' ').trim();
         }
 
-        // Join ALL remaining name tokens (Surname, First Name, Middle Name, Suffixes)
+        // Everything left over is the name
         name = cleanNameString(nameTokens.join(' '));
       } else {
-        // No numerical token: entire line comprises the name split across columns
+        // No number on this line: the whole line is the name
         name = cleanNameString(tokens.join(' '));
         amount = 0;
       }
     } else {
-      // Freeform single column line with trailing number
+      // One column with a number at the end
       const trailingNumberRegex = /(.*?)(?:[\s,;:\t]+(?:[₱$€£¥]|PHP|USD|EUR)?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?))\s*$/i;
       const match = line.match(trailingNumberRegex);
 

@@ -10,6 +10,7 @@ Built with TypeScript, React, Vite, Tailwind CSS and Electron.
 - Undo and redo for every change.
 - History of saved comparisons, JSON backup and restore, PDF and CSV export.
 - Light, dark or automatic theme.
+- Select and copy any text. Right-click for the menu, or press Ctrl+Shift+C to copy everything on the current screen.
 
 ## Development
 Requires Node.js 22 or newer.

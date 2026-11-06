@@ -278,7 +278,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     Data Differentiator
                   </h4>
                   <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold">
-                    Version 1.2.0
+                    Version 1.3.0
                   </p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                     High-speed fuzzy string comparison and numerical value differentiation engine.

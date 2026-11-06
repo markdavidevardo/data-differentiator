@@ -80,7 +80,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
             <div>
               <h3 className="font-bold text-sm">Bulk Paste & Import into {groupLabel}</h3>
               <p className="text-xs text-slate-300">
-                Paste rows from Excel, TSV, or CSV (Panel 1: String, Panel 2: Numerical Value)
+                Paste rows from Excel or a CSV file: a name and a value on each line
               </p>
             </div>
           </div>
@@ -150,8 +150,8 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
                   <thead className="bg-slate-200/70 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 text-[10px] uppercase font-semibold sticky top-0">
                     <tr>
                       <th className="py-1 px-3 w-8">#</th>
-                      <th className="py-1 px-3">Panel 1 (Full Name String)</th>
-                      <th className="py-1 px-3 text-right w-28">Panel 2 (Value)</th>
+                      <th className="py-1 px-3">Name</th>
+                      <th className="py-1 px-3 text-right w-28">Value</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-700">

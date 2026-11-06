@@ -11,7 +11,7 @@ interface PrintReportViewProps {
   category?: string;
   sheetTitle?: string;
   onChangeSheetTitle?: (title: string) => void;
-  onChangeCategory?: (cat: any) => void;
+  onChangeCategory?: (cat: string) => void;
   onBack?: () => void;
 }
 
@@ -214,10 +214,10 @@ export const PrintReportView: React.FC<PrintReportViewProps> = ({
 
     const headers = [
       'Status',
-      'Dataset A: Panel 1 String',
-      'Dataset A: Panel 2 Value',
-      'Dataset B: Panel 1 String',
-      'Dataset B: Panel 2 Value',
+      'Dataset A: Name',
+      'Dataset A: Value',
+      'Dataset B: Name',
+      'Dataset B: Value',
       'Value Difference',
       'Similarity Score (%)',
       'Distinct Common Parts',
@@ -355,10 +355,10 @@ export const PrintReportView: React.FC<PrintReportViewProps> = ({
             <thead>
               <tr className="border-b-2 border-slate-300 dark:border-slate-600 bg-slate-100/70 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold uppercase text-[10px]">
                 <th className="py-2 px-2 w-8">#</th>
-                <th className="py-2 px-2">Dataset A (Panel 1 String)</th>
-                <th className="py-2 px-2 text-right">Dataset A (Panel 2 Value)</th>
-                <th className="py-2 px-2">Dataset B (Panel 1 String)</th>
-                <th className="py-2 px-2 text-right">Dataset B (Panel 2 Value)</th>
+                <th className="py-2 px-2">Dataset A name</th>
+                <th className="py-2 px-2 text-right">Dataset A value</th>
+                <th className="py-2 px-2">Dataset B name</th>
+                <th className="py-2 px-2 text-right">Dataset B value</th>
                 <th className="py-2 px-2 text-right">Difference</th>
                 <th className="py-2 px-2 text-center">Status</th>
               </tr>

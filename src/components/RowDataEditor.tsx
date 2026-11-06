@@ -95,12 +95,12 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
     setNewR2Amount('');
   };
 
-  const updateRow1Field = (id: string, field: 'name' | 'contribution', value: any) => {
+  const updateRow1Field = (id: string, field: 'name' | 'contribution', value: string | number) => {
     const finalVal = field === 'name' ? String(value).replace(/\s{2,}/g, ' ') : value;
     onEditField('row1', id, field, finalVal);
   };
 
-  const updateRow2Field = (id: string, field: 'name' | 'contribution', value: any) => {
+  const updateRow2Field = (id: string, field: 'name' | 'contribution', value: string | number) => {
     const finalVal = field === 'name' ? String(value).replace(/\s{2,}/g, ' ') : value;
     onEditField('row2', id, field, finalVal);
   };
@@ -361,7 +361,7 @@ export const RowDataEditor: React.FC<RowDataEditorProps> = ({
                       />
                     </td>
                     <td className="py-1 px-3 font-mono">
-                      <NumberCell value={rec.contribution} onCommit={value => updateRow2Field(rec.id, 'contribution', value)} className="w-full px-2 py-1 bg-transparent hover:bg-slate-100/70 dark:hover:bg-slate-700/70 focus:bg-white dark:focus:bg-slate-900 focus:ring-1 focus:ring-blue-500 rounded text-xs text-blue-900 dark:text-blue-200 font-mono tabular-nums transition-colors" />
+                      <NumberCell value={rec.contribution} onCommit={value => updateRow2Field(rec.id, 'contribution', value)} className="w-full px-2 py-1 bg-transparent hover:bg-slate-100/70 dark:hover:bg-slate-700/70 focus:bg-white dark:focus:bg-slate-900 focus:ring-1 focus:ring-blue-500 rounded text-xs text-slate-800 dark:text-slate-200 font-mono tabular-nums transition-colors" />
                     </td>
                     <td className="py-1 px-3 text-center">
                       <Button

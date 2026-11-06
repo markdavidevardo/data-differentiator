@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.3.0
+### Added
+- Copy text from anywhere in the app. Names, values and other text can now be selected with the mouse and copied with Ctrl+C.
+- Right-click menu with Copy, Paste, Select all and "Copy all text on this screen".
+- Ctrl+Shift+C copies all the text on the current screen. Tables are copied one row per line, so they paste straight into Excel.
+
+### Fixed
+- Dataset B values in the Data Editor were blue in dark mode. They now match Dataset A.
+
+### Changed
+- Replaced the "Panel 1 / Panel 2" labels in the Bulk Paste dialog, PDF and CSV export with "Name" and "Value".
+- Cleaned up code comments and removed leftover template headers.
+
 ## 1.2.0
 ### Changed
 - Removed the A / B badge from the entry action buttons and edit dialog.
